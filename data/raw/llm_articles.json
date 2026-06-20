@@ -1,0 +1,27 @@
+[
+  {
+    "id": "llm_001",
+    "body": "A inflação no Brasil recuou para 4,2% em maio, abaixo das expectativas do mercado. O IPCA registrou queda nos preços de alimentos e energia elétrica. O Banco Central sinalizou possível corte na taxa Selic na próxima reunião do Copom. Economistas avaliam que o cenário é favorável para a retomada do crédito. A bolsa de valores reagiu positivamente, com o Ibovespa subindo 1,8% no pregão.",
+    "reference_title": "Inflação recua para 4,2% em maio e abre espaço para corte da Selic"
+  },
+  {
+    "id": "llm_002",
+    "body": "O Ministério da Saúde anunciou a ampliação da campanha de vacinação contra a dengue. A vacina estará disponível em postos de saúde de 50 municípios prioritários a partir de julho. O número de casos confirmados da doença já supera 1,5 milhão em 2026. Autoridades de saúde reforçam a importância da eliminação de focos do mosquito Aedes aegypti. A campanha também incluirá ações educativas nas escolas e comunidades de baixa renda.",
+    "reference_title": "Ministério da Saúde amplia vacinação contra dengue em 50 municípios"
+  },
+  {
+    "id": "llm_003",
+    "body": "A seleção brasileira de futebol venceu a Argentina por 2 a 1 nas eliminatórias da Copa do Mundo. Os gols foram marcados por Endrick e Vini Jr., enquanto a Argentina descontou no segundo tempo. Com a vitória, o Brasil assume a liderança das eliminatórias sul-americanas com 18 pontos. O técnico Dorival Júnior elogiou o desempenho coletivo da equipe. A próxima partida será contra o Uruguai, em Montevidéu, na próxima semana.",
+    "reference_title": "Brasil vence Argentina e assume liderança das eliminatórias"
+  },
+  {
+    "id": "llm_004",
+    "body": "O governo federal lançou o programa Energia Verde, voltado para a expansão de energia solar no país. O investimento previsto é de R$ 8 bilhões até 2028, com foco em regiões de menor IDH. A iniciativa deve gerar cerca de 120 mil empregos diretos e indiretos. O Brasil já é um dos maiores produtores de energia renovável do mundo. O programa inclui subsídios para instalação de painéis solares em residências de baixa renda.",
+    "reference_title": "Governo lança programa de R$ 8 bilhões para expansão de energia solar"
+  },
+  {
+    "id": "llm_005",
+    "body": "A startup brasileira Quanta recebeu investimento de R$ 200 milhões em rodada série B. A empresa desenvolve software de inteligência artificial para diagnóstico médico. O aporte foi liderado por fundos americanos e europeus especializados em healthtech. A Quanta pretende expandir para mercados da América Latina e Portugal nos próximos 18 meses. O CEO afirmou que o capital será usado principalmente em pesquisa e desenvolvimento.",
+    "reference_title": "Startup Quanta capta R$ 200 milhões para expandir IA médica na América Latina"
+  }
+]

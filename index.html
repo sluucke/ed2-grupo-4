@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ED2 — Grupo 4 · Documentação</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .sidebar {
+      width: 252px;
+      background: #0b0e18;
+      border-right: 1px solid #1e2535;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    .main {
+      margin-left: 252px;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .content-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ── Mobile header ── */
+    .mobile-header {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: #0b0e18;
+      border-bottom: 1px solid #1e2535;
+      padding: 0 1rem;
+      height: 52px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 36px;
+    }
+    .hamburger span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: #94a3b8;
+      border-radius: 2px;
+      transition: 0.22s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 25;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* ── Sidebar internals ── */
+    .sidebar-brand {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid #1e2535;
+      flex-shrink: 0;
+    }
+    .sidebar-brand-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #60a5fa;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .sidebar-brand-sub {
+      font-size: 0.7rem;
+      color: #334155;
+      margin-top: 0.2rem;
+    }
+
+    .sidebar-group {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #1e2535;
+    }
+    .sidebar-group:last-child { border-bottom: none; }
+
+    .sidebar-group-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #2d3a52;
+      padding: 0 1.25rem 0.4rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.38rem 1.25rem;
+      font-size: 0.81rem;
+      color: #4b6080;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .nav-link:hover { color: #94a3b8; background: #111420; }
+    .nav-link.active { color: #60a5fa; border-left-color: #3b82f6; background: #0d1526; }
+
+    .nav-num {
+      font-size: 0.68rem;
+      color: #2d3a52;
+      font-weight: 600;
+      min-width: 14px;
+    }
+    .nav-link.active .nav-num { color: #3b5a8a; }
+
+    /* ── Section titles (separators inside main) ── */
+    .section-sep {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin: 3rem 0 1.75rem;
+    }
+    .section-sep-line { flex: 1; height: 1px; background: #1e2535; }
+    .section-sep-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #2d3a52;
+      white-space: nowrap;
+    }
+
+    .page-header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #1e2535;
+    }
+    .page-header .badge {
+      display: inline-block;
+      background: #1e3a5f;
+      color: #60a5fa;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .page-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.25;
+    }
+    .page-header p {
+      margin-top: 0.4rem;
+      font-size: 0.88rem;
+      color: #475569;
+    }
+
+    /* ── Cards (respostas) ── */
+    .card {
+      background: #141720;
+      border: 1px solid #1e2535;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      scroll-margin-top: 80px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .card-number {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: #1e3a5f;
+      color: #60a5fa;
+      font-weight: 700;
+      font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .card p { color: #64748b; line-height: 1.7; font-size: 0.92rem; }
+    .card p + p { margin-top: 0.65rem; }
+
+    ul.list { list-style: none; margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem; }
+    ul.list li {
+      display: flex; align-items: flex-start; gap: 0.55rem;
+      color: #64748b; font-size: 0.92rem; line-height: 1.6;
+    }
+    ul.list li::before { content: '→'; color: #3b82f6; flex-shrink: 0; margin-top: 0.05rem; }
+
+    strong { color: #cbd5e1; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+    th {
+      text-align: left; padding: 0.55rem 0.7rem;
+      background: #0f1117; color: #334155;
+      font-weight: 700; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid #1e2535;
+    }
+    td {
+      padding: 0.6rem 0.7rem;
+      border-bottom: 1px solid #141720;
+      color: #64748b; line-height: 1.5;
+    }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: #cbd5e1; font-weight: 500; white-space: nowrap; }
+
+    .note {
+      margin-top: 0.85rem;
+      padding: 0.7rem 0.9rem;
+      background: #0f1117;
+      border-left: 2px solid #3b82f6;
+      border-radius: 0 6px 6px 0;
+      color: #64748b;
+      font-size: 0.87rem;
+      line-height: 1.65;
+    }
+
+    .example-block { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem; }
+    .example-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 0.25rem;
+    }
+    .example-label.input { color: #334155; }
+    .example-label.output { color: #22c55e; }
+    .example-text {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 7px; padding: 0.8rem 0.95rem;
+      font-size: 0.87rem; line-height: 1.7; color: #64748b;
+    }
+    .example-text.output { border-color: #166534; color: #86efac; }
+
+    .flow {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 0.85rem; align-items: center;
+    }
+    .flow-step {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 5px; padding: 0.28rem 0.65rem;
+      font-size: 0.78rem; color: #64748b;
+    }
+    .flow-arrow { color: #3b82f6; font-size: 0.82rem; }
+
+    /* ── Doc cards ── */
+    .doc-card {
+      background: #141720; border: 1px solid #1e2535;
+      border-radius: 10px; padding: 1.5rem;
+      margin-bottom: 1rem;
+      scroll-margin-top: 80px;
+    }
+    .doc-card h3 { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.25rem; }
+    .doc-card .doc-subtitle { font-size: 0.78rem; color: #334155; margin-bottom: 1.1rem; }
+    .doc-card p { color: #64748b; font-size: 0.9rem; line-height: 1.7; }
+    .doc-card p + p { margin-top: 0.6rem; }
+
+    .formula-box {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 7px; padding: 1.1rem;
+      margin: 0.85rem 0; text-align: center;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem; color: #93c5fd;
+      letter-spacing: 0.02em; line-height: 1.7;
+    }
+    .formula-box .formula-label {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.68rem; color: #334155;
+      text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 0.45rem;
+    }
+
+    .tfidf-example {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem; margin-top: 0.85rem;
+    }
+    @media (max-width: 520px) { .tfidf-example { grid-template-columns: 1fr; } }
+
+    .tfidf-col {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 7px; padding: 0.75rem;
+    }
+    .tfidf-col-title {
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.09em;
+      color: #334155; margin-bottom: 0.55rem;
+    }
+    .tfidf-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.22rem 0; border-bottom: 1px solid #141720;
+      font-size: 0.8rem;
+    }
+    .tfidf-row:last-child { border-bottom: none; }
+    .tfidf-word { color: #cbd5e1; }
+    .tfidf-val { font-family: monospace; }
+    .tfidf-val.high { color: #4ade80; }
+    .tfidf-val.low  { color: #ef4444; }
+    .tfidf-val.mid  { color: #facc15; }
+
+    .versus-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.84rem; }
+    .versus-table th {
+      padding: 0.55rem 0.7rem; background: #0f1117; color: #334155;
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; border-bottom: 1px solid #1e2535; text-align: center;
+    }
+    .versus-table th:first-child { text-align: left; }
+    .versus-table td {
+      padding: 0.55rem 0.7rem; border-bottom: 1px solid #111420;
+      color: #64748b; text-align: center; vertical-align: middle;
+    }
+    .versus-table td:first-child { text-align: left; color: #cbd5e1; font-weight: 600; white-space: nowrap; }
+    .versus-table tr:last-child td { border-bottom: none; }
+    .versus-table tr.highlight-row td { background: #0d1a2d; }
+
+    .tag {
+      display: inline-block; padding: 0.12rem 0.45rem;
+      border-radius: 4px; font-size: 0.72rem; font-weight: 600;
+    }
+    .tag-green  { background: #14532d; color: #4ade80; }
+    .tag-red    { background: #450a0a; color: #f87171; }
+    .tag-yellow { background: #422006; color: #fbbf24; }
+    .tag-blue   { background: #1e3a5f; color: #60a5fa; }
+
+    .svg-wrapper {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 8px; padding: 0.85rem;
+      margin-top: 0.85rem; overflow-x: auto;
+    }
+    .svg-caption {
+      text-align: center; font-size: 0.75rem;
+      color: #334155; margin-top: 0.5rem;
+    }
+
+    .matrix-grid { display: inline-grid; gap: 3px; margin-top: 0.85rem; }
+    .matrix-cell {
+      width: 52px; height: 34px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-family: monospace; font-weight: 600;
+    }
+    .matrix-header { background: transparent; color: #334155; font-size: 0.68rem; }
+    .cell-diag { background: #1e3a5f; color: #60a5fa; }
+    .cell-high { background: #14532d; color: #4ade80; }
+    .cell-mid  { background: #422006; color: #fbbf24; }
+    .cell-low  { background: #111420; color: #334155; }
+
+    .algo-steps { display: flex; flex-direction: column; gap: 0; margin-top: 1rem; }
+    .algo-step { display: flex; gap: 0.85rem; align-items: stretch; }
+    .algo-step-connector { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    .algo-step-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #3b82f6; flex-shrink: 0; margin-top: 0.3rem;
+    }
+    .algo-step-line { width: 2px; flex: 1; background: #1e2535; margin: 3px 0; }
+    .algo-step:last-child .algo-step-line { display: none; }
+    .algo-step-body { padding-bottom: 1rem; padding-top: 0.1rem; }
+    .algo-step-title { font-size: 0.86rem; font-weight: 600; color: #e2e8f0; }
+    .algo-step-desc { font-size: 0.8rem; color: #475569; margin-top: 0.2rem; line-height: 1.55; }
+
+    code {
+      background: #0f1117; border: 1px solid #1e2535;
+      border-radius: 4px; padding: 0.1rem 0.38rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8em; color: #93c5fd;
+    }
+
+    footer {
+      text-align: center; margin-top: 4rem;
+      padding-top: 1.5rem; border-top: 1px solid #1e2535;
+      color: #1e2535; font-size: 0.78rem;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .mobile-header { display: flex; }
+      .sidebar { transform: translateX(-100%); top: 52px; height: calc(100vh - 52px); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,.5); }
+      .main { margin-left: 0; padding: 1.25rem 1rem 3rem; }
+      .card, .doc-card { padding: 1.1rem; }
+      .formula-box { font-size: 0.78rem; }
+      .tfidf-example { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile header -->
+  <div class="mobile-header">
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-title">ED2 · Grupo 4</span>
+    <div style="width:36px"></div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">ED2 · Grupo 4</div>
+      <div class="sidebar-brand-sub">Universidade de Brasília · 2026</div>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Respostas ao Professor</div>
+      <a href="#area"      class="nav-link"><span class="nav-num">1</span> Área de Aplicação</a>
+      <a href="#problema"  class="nav-link"><span class="nav-num">2</span> Problema</a>
+      <a href="#input"     class="nav-link"><span class="nav-num">3</span> Input</a>
+      <a href="#grafo"     class="nav-link"><span class="nav-num">4</span> Modelagem do Grafo</a>
+      <a href="#estruturas" class="nav-link"><span class="nav-num">5</span> Estruturas de Dados</a>
+      <a href="#output"    class="nav-link"><span class="nav-num">6</span> Output</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Documentação Técnica</div>
+      <a href="#similaridade"   class="nav-link">Similaridade</a>
+      <a href="#comparativo"    class="nav-link">Comparativo</a>
+      <a href="#vis-grafo"      class="nav-link">Visualização do Grafo</a>
+      <a href="#matriz"         class="nav-link">Matriz de Similaridade</a>
+      <a href="#textrank-algo"  class="nav-link">TextRank — Passos</a>
+      <a href="#pagerank"       class="nav-link">PageRank — Origem</a>
+      <a href="#textrank-adapt" class="nav-link">TextRank — Adaptação</a>
+      <a href="#convergencia"   class="nav-link">Convergência</a>
+      <a href="#heuristica"     class="nav-link">Heurística de Título</a>
+      <a href="#complexidade"   class="nav-link">Complexidade</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="content-wrap">
+
+      <div class="page-header">
+        <div class="badge">ED2 · Grupo 4 · UnB</div>
+        <h1>Geração Automática de Títulos de Notícias</h1>
+        <p>Conversa com o professor — 10 de junho de 2026</p>
+      </div>
+
+      <!-- ═══ RESPOSTAS ═══ -->
+      <div class="section-sep">
+        <div class="section-sep-line"></div>
+        <div class="section-sep-label">Respostas ao Professor</div>
+        <div class="section-sep-line"></div>
+      </div>
+
+      <div class="card" id="area">
+        <div class="card-header">
+          <div class="card-number">1</div>
+          <h2>Área de Aplicação</h2>
+        </div>
+        <p><strong>Jornalismo / Geração Automática de Títulos de Notícias</strong></p>
+        <p>O sistema recebe o corpo de um artigo jornalístico e gera automaticamente um título para ele — sem título original, sem supervisão humana. A frase mais central identificada pelo TextRank serve de base para o título gerado.</p>
+        <ul class="list">
+          <li><strong>Redações:</strong> acelerar o processo editorial gerando sugestões de título para jornalistas</li>
+          <li><strong>Newsletters:</strong> titular automaticamente artigos curados sem título próprio</li>
+          <li><strong>Indexação de acervos:</strong> gerar títulos para documentos digitalizados sem cabeçalho</li>
+        </ul>
+      </div>
+
+      <div class="card" id="problema">
+        <div class="card-header">
+          <div class="card-number">2</div>
+          <h2>Problema a Resolver</h2>
+        </div>
+        <p>Escrever um bom título de notícia exige identificar a <strong>informação mais central</strong> do texto — tarefa que consome tempo do jornalista e que pode ser automatizada.</p>
+        <p>O problema técnico é: dado o corpo de um artigo, <strong>qual é a frase que melhor o representa?</strong> Essa frase, possivelmente ajustada por uma heurística de comprimento, se torna o título gerado. O sistema opera sem supervisão — não precisa de pares (artigo, título) para treinar.</p>
+      </div>
+
+      <div class="card" id="input">
+        <div class="card-header">
+          <div class="card-number">3</div>
+          <h2>Input — Dados de Entrada</h2>
+        </div>
+        <ul class="list">
+          <li><strong>Formato:</strong> textos em formato livre (strings / arquivos <code>.txt</code>)</li>
+          <li><strong>Tipo:</strong> dados reais — artigos de notícias de datasets públicos (ex: CNN/DailyMail, CSTNews)</li>
+          <li>Dados fictícios gerados por LLM poderão ser usados como complemento para casos de teste</li>
+        </ul>
+      </div>
+
+      <div class="card" id="grafo">
+        <div class="card-header">
+          <div class="card-number">4</div>
+          <h2>Modelagem do Grafo</h2>
+        </div>
+        <table>
+          <thead><tr><th>Elemento</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td>Vértices</td><td>Cada frase do texto</td></tr>
+            <tr><td>Arestas</td><td>Conexão entre duas frases semanticamente relacionadas</td></tr>
+            <tr><td>Peso</td><td>Número de palavras em comum após remoção de stopwords e stemming, normalizado pelo tamanho das frases</td></tr>
+            <tr><td>Tipo</td><td>Grafo não-direcionado e ponderado</td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          Arestas com peso abaixo de um limiar são descartadas para evitar um grafo denso demais.<br/><br/>
+          <strong>Algoritmo principal:</strong> TextRank (variante do PageRank) — ranqueia as frases por importância com base na estrutura do grafo. A frase com maior score é candidata ao título, passando pela heurística de comprimento antes da saída final.
+        </div>
+        <div class="flow">
+          <span class="flow-step">Texto</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Frases</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Stopwords + Stem</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Palavras Comuns</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Grafo</span><span class="flow-arrow">→</span>
+          <span class="flow-step">TextRank</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Heurística</span><span class="flow-arrow">→</span>
+          <span class="flow-step">Título</span>
+        </div>
+      </div>
+
+      <div class="card" id="estruturas">
+        <div class="card-header">
+          <div class="card-number">5</div>
+          <h2>Outra Estrutura de Dados</h2>
+        </div>
+        <ul class="list">
+          <li><strong>Heap (fila de prioridade):</strong> usada para extrair eficientemente as K frases com maior score após rodar o TextRank — O(log n) por extração</li>
+          <li><strong>Tabela hash (dicionário):</strong> armazena o conjunto de palavras de cada frase (após stopwords e stemming) para calcular a interseção eficientemente</li>
+          <li><strong>Matriz de adjacência (vetor de vetores):</strong> representação interna do grafo de similaridade</li>
+        </ul>
+      </div>
+
+      <div class="card" id="output">
+        <div class="card-header">
+          <div class="card-number">6</div>
+          <h2>Output</h2>
+        </div>
+        <p>Um <strong>título gerado automaticamente</strong> — a frase mais central do artigo, processada pela heurística de comprimento.</p>
+        <div class="example-block">
+          <div>
+            <div class="example-label input">Input — corpo do artigo</div>
+            <div class="example-text">"O Brasil registrou recorde de exportações em maio. O agronegócio liderou os resultados, com destaque para a soja e o milho. A balança comercial fechou com superávit de R$ 12 bilhões. Analistas apontam o câmbio favorável como fator principal. O setor industrial também apresentou crescimento moderado."</div>
+          </div>
+          <div>
+            <div class="example-label output">Output — título gerado</div>
+            <div class="example-text output">"Balança comercial fecha com superávit de R$ 12 bilhões em maio"</div>
+          </div>
+        </div>
+        <div class="note">
+          A frase top-1 do TextRank é a candidata. Se tiver menos de <strong>5 palavras</strong> após stopwords, combina com a top-2. Se tiver mais de <strong>20 palavras</strong>, trunca no primeiro separador natural (vírgula, ponto e vírgula). O score e o caminho tomado pela heurística são reportados junto ao título.
+        </div>
+      </div>
+
+      <!-- ═══ DOCUMENTAÇÃO TÉCNICA ═══ -->
+      <div class="section-sep">
+        <div class="section-sep-line"></div>
+        <div class="section-sep-label">Documentação Técnica</div>
+        <div class="section-sep-line"></div>
+      </div>
+
+      <!-- Similaridade -->
+      <div class="doc-card" id="similaridade">
+        <h3>Similaridade por Palavras Comuns</h3>
+        <div class="doc-subtitle">Como medimos o quão parecidas duas frases são</div>
+        <p>Ao invés de vetorizar as frases, comparamos diretamente quais palavras elas compartilham — após dois pré-processamentos essenciais: remoção de <strong>stopwords</strong> e aplicação de <strong>stemming</strong>.</p>
+        <div class="formula-box">
+          <div class="formula-label">Fórmula de Similaridade (TextRank original)</div>
+          sim(Sᵢ, Sⱼ) = |palavras(Sᵢ) ∩ palavras(Sⱼ)| / (log|palavras(Sᵢ)| + log|palavras(Sⱼ)|)
+        </div>
+        <div class="note">A divisão por <code>log|Si| + log|Sj|</code> normaliza pelo tamanho — evita que frases longas ganhem vantagem só por terem mais palavras.</div>
+
+        <p style="margin-top:1.25rem; font-weight:600; color:#e2e8f0;">Passo 1 — Remoção de Stopwords</p>
+        <p style="margin-top:0.4rem;">Conectivos, preposições e artigos não carregam significado — removê-los faz a comparação focar no conteúdo real.</p>
+        <div class="tfidf-example" style="grid-template-columns:1fr 1fr; margin-top:0.75rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Frase original</div>
+            <div class="tfidf-row"><span class="tfidf-word">O</span><span class="tfidf-val low">✗ stopword</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Brasil</span><span class="tfidf-val high">✓ mantém</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">registrou</span><span class="tfidf-val high">✓ mantém</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">recorde</span><span class="tfidf-val high">✓ mantém</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">de</span><span class="tfidf-val low">✗ stopword</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">exportações</span><span class="tfidf-val high">✓ mantém</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">em</span><span class="tfidf-val low">✗ stopword</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">maio</span><span class="tfidf-val high">✓ mantém</span></div>
+          </div>
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Stopwords do português</div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.4rem;">
+              <code>a</code><code>o</code><code>as</code><code>os</code><code>e</code><code>ou</code>
+              <code>de</code><code>da</code><code>do</code><code>em</code><code>no</code><code>na</code>
+              <code>por</code><code>para</code><code>com</code><code>que</code><code>se</code>
+              <code>um</code><code>uma</code><code>ao</code><code>à</code><code>mas</code>
+              <code>foi</code><code>são</code><code>esse</code><code>esta</code>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:1.25rem; font-weight:600; color:#e2e8f0;">Passo 2 — Stemming (Radical)</p>
+        <p style="margin-top:0.4rem;">Palavras no plural, conjugadas ou com sufixos diferentes representam o mesmo conceito. O stemming reduz cada palavra ao seu radical.</p>
+        <div class="tfidf-example" style="grid-template-columns:1fr 1fr 1fr; margin-top:0.75rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Palavra original</div>
+            <div class="tfidf-row"><span class="tfidf-word">exportações</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">exportação</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">liderou</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">lideramos</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">comerciais</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">comercial</span></div>
+          </div>
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Radical (stem)</div>
+            <div class="tfidf-row"><span class="tfidf-val high">export</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">export</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">lider</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">lider</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">comerci</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">comerci</span></div>
+          </div>
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Mesmo radical?</div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+            <div class="tfidf-row"><span class="tfidf-val high">✓ iguais</span></div>
+          </div>
+        </div>
+
+        <p style="margin-top:1.25rem; font-weight:600; color:#e2e8f0;">Exemplo de cálculo</p>
+        <div class="tfidf-example" style="grid-template-columns:1fr; margin-top:0.75rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Frase 1 — stems</div>
+            <div style="margin-top:0.4rem; color:#64748b; font-size:0.83rem; font-family:monospace;">{ brasil, registr, record, export, mai }</div>
+          </div>
+        </div>
+        <div class="tfidf-example" style="grid-template-columns:1fr; margin-top:0.4rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Frase 2 — stems</div>
+            <div style="margin-top:0.4rem; color:#64748b; font-size:0.83rem; font-family:monospace;">{ agronegoci, lider, result, destaqu, soj, milh, export, mai }</div>
+          </div>
+        </div>
+        <div class="formula-box" style="margin-top:0.75rem; font-size:0.85rem;">
+          <div class="formula-label">Interseção</div>
+          { export, mai }  →  |interseção| = 2<br/><br/>
+          sim = 2 / (log 5 + log 8) = 2 / (1.61 + 2.08) = <span style="color:#4ade80; font-weight:700;">0.54</span>
+        </div>
+      </div>
+
+      <!-- Comparativo -->
+      <div class="doc-card" id="comparativo">
+        <h3>Abordagens de Similaridade — Comparativo</h3>
+        <div class="doc-subtitle">Por que escolhemos contagem de palavras comuns e não outras técnicas</div>
+        <table class="versus-table">
+          <thead>
+            <tr><th>Método</th><th>Base da comparação</th><th>Complexidade</th><th>Deps externas</th><th>Adequação</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight-row">
+              <td>Palavras Comuns ✦</td>
+              <td><span class="tag tag-yellow">Léxica</span></td>
+              <td><span class="tag tag-green">Baixa</span></td>
+              <td><span class="tag tag-green">Nenhuma</span></td>
+              <td><span class="tag tag-blue">Escolhido</span></td>
+            </tr>
+            <tr>
+              <td>TF-IDF + Cosseno</td>
+              <td><span class="tag tag-yellow">Léxica + Peso</span></td>
+              <td><span class="tag tag-yellow">Média</span></td>
+              <td><span class="tag tag-green">Nenhuma</span></td>
+              <td><span class="tag tag-yellow">Mais complexo</span></td>
+            </tr>
+            <tr>
+              <td>Word2Vec</td>
+              <td><span class="tag tag-green">Semântica</span></td>
+              <td><span class="tag tag-yellow">Média</span></td>
+              <td><span class="tag tag-yellow">Modelo treinado</span></td>
+              <td><span class="tag tag-red">Fora do escopo</span></td>
+            </tr>
+            <tr>
+              <td>BERT / BERTimbau</td>
+              <td><span class="tag tag-green">Contextual</span></td>
+              <td><span class="tag tag-red">Alta</span></td>
+              <td><span class="tag tag-red">GPU / PyTorch</span></td>
+              <td><span class="tag tag-red">Excessivo</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:1rem;">
+          Contagem de palavras comuns é a abordagem usada no <strong>artigo original do TextRank (Mihalcea &amp; Tarau, 2004)</strong>. É implementável do zero em C++/Python, sem nenhuma biblioteca externa, totalmente transparente e suficiente para textos jornalísticos com vocabulário específico.
+        </div>
+      </div>
+
+      <!-- Visualização do Grafo -->
+      <div class="doc-card" id="vis-grafo">
+        <h3>Visualização do Grafo</h3>
+        <div class="doc-subtitle">Como as frases se conectam — exemplo com 5 frases de uma notícia</div>
+        <p>Cada círculo é uma frase. A espessura e a cor de cada aresta representa o peso (palavras em comum). Arestas abaixo do limiar θ são removidas.</p>
+        <div class="svg-wrapper">
+          <svg viewBox="0 0 600 380" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', sans-serif">
+            <line x1="180" y1="120" x2="420" y2="120" stroke="#22c55e" stroke-width="3" stroke-opacity="0.7"/>
+            <text x="300" y="108" text-anchor="middle" fill="#22c55e" font-size="11">0.82</text>
+            <line x1="180" y1="140" x2="130" y2="255" stroke="#facc15" stroke-width="2" stroke-opacity="0.6"/>
+            <text x="138" y="200" text-anchor="middle" fill="#facc15" font-size="11">0.61</text>
+            <line x1="195" y1="142" x2="300" y2="285" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,4" stroke-opacity="0.5"/>
+            <text x="238" y="230" text-anchor="middle" fill="#475569" font-size="10">0.21 (θ)</text>
+            <line x1="405" y1="140" x2="155" y2="255" stroke="#facc15" stroke-width="1.8" stroke-opacity="0.5"/>
+            <text x="275" y="198" text-anchor="middle" fill="#facc15" font-size="11">0.54</text>
+            <line x1="435" y1="140" x2="470" y2="255" stroke="#22c55e" stroke-width="2.5" stroke-opacity="0.65"/>
+            <text x="468" y="202" text-anchor="middle" fill="#22c55e" font-size="11">0.73</text>
+            <line x1="155" y1="272" x2="445" y2="272" stroke="#facc15" stroke-width="1.5" stroke-opacity="0.45"/>
+            <text x="300" y="266" text-anchor="middle" fill="#facc15" font-size="11">0.43</text>
+            <line x1="315" y1="290" x2="450" y2="275" stroke="#475569" stroke-width="1" stroke-dasharray="4,4" stroke-opacity="0.4"/>
+            <text x="392" y="302" text-anchor="middle" fill="#475569" font-size="10">0.19 (θ)</text>
+            <circle cx="180" cy="120" r="38" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="180" y="115" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="700">F1</text>
+            <text x="180" y="129" text-anchor="middle" fill="#60a5fa" font-size="10">score: 0.31</text>
+            <circle cx="420" cy="120" r="44" fill="#14532d" stroke="#22c55e" stroke-width="2.5"/>
+            <text x="420" y="115" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">F2</text>
+            <text x="420" y="129" text-anchor="middle" fill="#4ade80" font-size="10">score: 0.35 ★</text>
+            <circle cx="130" cy="270" r="34" fill="#141720" stroke="#334155" stroke-width="1.8"/>
+            <text x="130" y="265" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700">F3</text>
+            <text x="130" y="279" text-anchor="middle" fill="#475569" font-size="10">score: 0.22</text>
+            <circle cx="300" cy="300" r="28" fill="#0f1117" stroke="#1e2535" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="300" y="295" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">F4</text>
+            <text x="300" y="309" text-anchor="middle" fill="#1e2535" font-size="10">score: 0.08</text>
+            <circle cx="470" cy="270" r="34" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.8"/>
+            <text x="470" y="265" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="700">F5</text>
+            <text x="470" y="279" text-anchor="middle" fill="#60a5fa" font-size="10">score: 0.28</text>
+            <g transform="translate(10, 335)">
+              <line x1="0" y1="8" x2="24" y2="8" stroke="#22c55e" stroke-width="2.5"/>
+              <text x="28" y="12" fill="#475569" font-size="10">aresta forte (≥ 0.6)</text>
+              <line x1="130" y1="8" x2="154" y2="8" stroke="#facc15" stroke-width="1.8"/>
+              <text x="158" y="12" fill="#475569" font-size="10">aresta média (≥ 0.25)</text>
+              <line x1="280" y1="8" x2="304" y2="8" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <text x="308" y="12" fill="#475569" font-size="10">abaixo do limiar θ (removida)</text>
+            </g>
+          </svg>
+        </div>
+        <div class="svg-caption">F2 tem o maior score pois está fortemente conectado a F1 (0.82) e F5 (0.73) — seria a candidata ao título.</div>
+      </div>
+
+      <!-- Matriz -->
+      <div class="doc-card" id="matriz">
+        <h3>Matriz de Similaridade</h3>
+        <div class="doc-subtitle">Representação interna antes de montar o grafo</div>
+        <p>Antes de criar as arestas, calculamos a similaridade entre todos os pares de frases. O resultado é uma <strong>matriz simétrica N×N</strong> (estrutura de dado adicional: vetor de vetores / matriz de adjacência).</p>
+        <div style="overflow-x:auto; margin-top:1rem;">
+          <div class="matrix-grid" style="grid-template-columns: repeat(6, 52px);">
+            <div class="matrix-cell matrix-header"></div>
+            <div class="matrix-cell matrix-header">F1</div>
+            <div class="matrix-cell matrix-header">F2</div>
+            <div class="matrix-cell matrix-header">F3</div>
+            <div class="matrix-cell matrix-header">F4</div>
+            <div class="matrix-cell matrix-header">F5</div>
+            <div class="matrix-cell matrix-header">F1</div><div class="matrix-cell cell-diag">1.00</div><div class="matrix-cell cell-high">0.82</div><div class="matrix-cell cell-mid">0.61</div><div class="matrix-cell cell-low">0.21</div><div class="matrix-cell cell-low">0.34</div>
+            <div class="matrix-cell matrix-header">F2</div><div class="matrix-cell cell-high">0.82</div><div class="matrix-cell cell-diag">1.00</div><div class="matrix-cell cell-mid">0.54</div><div class="matrix-cell cell-low">0.17</div><div class="matrix-cell cell-high">0.73</div>
+            <div class="matrix-cell matrix-header">F3</div><div class="matrix-cell cell-mid">0.61</div><div class="matrix-cell cell-mid">0.54</div><div class="matrix-cell cell-diag">1.00</div><div class="matrix-cell cell-low">0.29</div><div class="matrix-cell cell-mid">0.43</div>
+            <div class="matrix-cell matrix-header">F4</div><div class="matrix-cell cell-low">0.21</div><div class="matrix-cell cell-low">0.17</div><div class="matrix-cell cell-low">0.29</div><div class="matrix-cell cell-diag">1.00</div><div class="matrix-cell cell-low">0.19</div>
+            <div class="matrix-cell matrix-header">F5</div><div class="matrix-cell cell-low">0.34</div><div class="matrix-cell cell-high">0.73</div><div class="matrix-cell cell-mid">0.43</div><div class="matrix-cell cell-low">0.19</div><div class="matrix-cell cell-diag">1.00</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.85rem;">
+          <span class="tag tag-blue">Azul = diagonal (1.0)</span>
+          <span class="tag tag-green">Verde ≥ 0.6</span>
+          <span class="tag tag-yellow">Amarelo ≥ 0.25</span>
+          <span class="tag tag-red">Vermelho &lt; 0.25 (removida)</span>
+        </div>
+      </div>
+
+      <!-- TextRank passos -->
+      <div class="doc-card" id="textrank-algo">
+        <h3>Algoritmo TextRank — Passo a Passo</h3>
+        <div class="doc-subtitle">Variante do PageRank aplicada a frases</div>
+        <p>O TextRank itera sobre o grafo atualizando o score de cada frase com base nos scores das frases vizinhas — uma frase é importante se frases importantes apontam para ela.</p>
+        <div class="formula-box" style="margin-top:1rem;">
+          <div class="formula-label">Fórmula de atualização (por iteração)</div>
+          Score(Fᵢ) = (1 − d) + d × Σ [ w(Fⱼ, Fᵢ) / Σw(Fⱼ, Fₖ) × Score(Fⱼ) ]
+        </div>
+        <p style="margin-top:0.5rem; font-size:0.8rem; color:#334155;">d = fator de amortecimento (0.85) &nbsp;·&nbsp; w = peso da aresta</p>
+        <div class="algo-steps" style="margin-top:1.25rem;">
+          <div class="algo-step"><div class="algo-step-connector"><div class="algo-step-dot"></div><div class="algo-step-line"></div></div><div class="algo-step-body"><div class="algo-step-title">Inicializar scores</div><div class="algo-step-desc">Todos os vértices recebem score = 1.0 como valor inicial.</div></div></div>
+          <div class="algo-step"><div class="algo-step-connector"><div class="algo-step-dot"></div><div class="algo-step-line"></div></div><div class="algo-step-body"><div class="algo-step-title">Iterar até convergência</div><div class="algo-step-desc">Para cada frase, recalcula o score somando a contribuição ponderada de todas as frases vizinhas. Repete até a variação máxima entre iterações ser &lt; 0.0001.</div></div></div>
+          <div class="algo-step"><div class="algo-step-connector"><div class="algo-step-dot"></div><div class="algo-step-line"></div></div><div class="algo-step-body"><div class="algo-step-title">Inserir scores no heap</div><div class="algo-step-desc">Cada (score, índice_frase) é inserido na fila de prioridade — O(log n) por inserção.</div></div></div>
+          <div class="algo-step"><div class="algo-step-connector"><div class="algo-step-dot"></div><div class="algo-step-line"></div></div><div class="algo-step-body"><div class="algo-step-title">Extrair top-1 (candidata ao título)</div><div class="algo-step-desc">Remove a frase de maior score do heap — O(log n). Passa pela heurística de comprimento antes de virar o título final.</div></div></div>
+          <div class="algo-step"><div class="algo-step-connector"><div class="algo-step-dot"></div></div><div class="algo-step-body"><div class="algo-step-title">Aplicar heurística e gerar título</div><div class="algo-step-desc">Verifica comprimento. Trunca, combina ou usa diretamente. Reporta o score e o caminho tomado.</div></div></div>
+        </div>
+      </div>
+
+      <!-- PageRank/TextRank divider -->
+      <div class="section-sep" style="margin-top:2rem;">
+        <div class="section-sep-line"></div>
+        <div class="section-sep-label">PageRank &amp; TextRank — Explicação Completa</div>
+        <div class="section-sep-line"></div>
+      </div>
+
+      <!-- PageRank Origem -->
+      <div class="doc-card" id="pagerank">
+        <h3>PageRank — A Origem</h3>
+        <div class="doc-subtitle">O algoritmo que fundou o Google (Brin &amp; Page, 1998)</div>
+        <p>Antes do PageRank, buscadores ranqueavam páginas pelo número de vezes que a palavra-chave aparecia no texto. O Google propôs uma ideia diferente: <strong>uma página é importante se outras páginas importantes apontam para ela.</strong></p>
+        <p style="margin-top:0.65rem;">A intuição é a de um <strong>surfista aleatório na web</strong>: imagine alguém que navega clicando em links aleatórios indefinidamente. A probabilidade de ele estar em determinada página depois de muitos cliques é o score PageRank dessa página.</p>
+        <div class="formula-box" style="margin-top:1rem;">
+          <div class="formula-label">Fórmula do PageRank</div>
+          PR(A) = (1 − d) + d × Σ [ PR(Tᵢ) / L(Tᵢ) ]
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.5rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Variável</div>
+            <div class="tfidf-row"><span class="tfidf-word">d</span><span style="color:#64748b;font-size:0.8rem;">fator de amortecimento (0.85)</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Tᵢ</span><span style="color:#64748b;font-size:0.8rem;">páginas que apontam para A</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">L(Tᵢ)</span><span style="color:#64748b;font-size:0.8rem;">nº de links saindo de Tᵢ</span></div>
+          </div>
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">Intuição</div>
+            <div style="color:#64748b;font-size:0.82rem;line-height:1.6;margin-top:0.4rem;"><strong>d = 0.85</strong> modela a chance do surfista continuar clicando (85%) vs. pular para uma página aleatória (15%). Evita que nós isolados zeren.</div>
+          </div>
+        </div>
+        <div class="svg-wrapper" style="margin-top:1rem;">
+          <svg viewBox="0 0 620 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', sans-serif">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+              <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/></marker>
+              <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker>
+            </defs>
+            <line x1="180" y1="95" x2="108" y2="125" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
+            <line x1="200" y1="105" x2="300" y2="200" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="115" y1="155" x2="195" y2="200" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="240" y1="215" x2="195" y2="110" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+            <line x1="255" y1="220" x2="315" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="330" y1="196" x2="130" y2="158" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+            <line x1="325" y1="210" x2="260" y2="218" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="450" y1="130" x2="220" y2="100" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#arrow-blue)"/>
+            <line x1="460" y1="145" x2="360" y2="200" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <circle cx="100" cy="150" r="32" fill="#141720" stroke="#334155" stroke-width="1.8"/>
+            <text x="100" y="145" text-anchor="middle" fill="#64748b" font-size="13" font-weight="700">A</text>
+            <text x="100" y="161" text-anchor="middle" fill="#475569" font-size="10">PR: 0.18</text>
+            <circle cx="228" cy="225" r="36" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
+            <text x="228" y="220" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">B</text>
+            <text x="228" y="236" text-anchor="middle" fill="#60a5fa" font-size="10">PR: 0.29</text>
+            <circle cx="200" cy="88" r="40" fill="#14532d" stroke="#22c55e" stroke-width="2.5"/>
+            <text x="200" y="83" text-anchor="middle" fill="#86efac" font-size="13" font-weight="700">C</text>
+            <text x="200" y="99" text-anchor="middle" fill="#4ade80" font-size="10">PR: 0.38 ★</text>
+            <circle cx="340" cy="210" r="32" fill="#141720" stroke="#334155" stroke-width="1.8"/>
+            <text x="340" y="205" text-anchor="middle" fill="#64748b" font-size="13" font-weight="700">D</text>
+            <text x="340" y="221" text-anchor="middle" fill="#475569" font-size="10">PR: 0.22</text>
+            <circle cx="465" cy="120" r="30" fill="#0f1117" stroke="#1e2535" stroke-width="1.5"/>
+            <text x="465" y="115" text-anchor="middle" fill="#334155" font-size="13" font-weight="700">E</text>
+            <text x="465" y="131" text-anchor="middle" fill="#1e2535" font-size="10">PR: 0.11</text>
+            <text x="200" y="140" text-anchor="middle" fill="#334155" font-size="9">página mais linkada</text>
+            <text x="465" y="162" text-anchor="middle" fill="#1e2535" font-size="9">página isolada</text>
+            <line x1="10" y1="278" x2="34" y2="278" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+            <text x="38" y="282" fill="#475569" font-size="10">link de página importante</text>
+            <line x1="200" y1="278" x2="224" y2="278" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <text x="228" y="282" fill="#475569" font-size="10">link comum</text>
+          </svg>
+        </div>
+        <div class="svg-caption">C tem o maior PageRank pois recebe links de B (PR alto) e E — qualidade vale mais que quantidade.</div>
+      </div>
+
+      <!-- TextRank adaptação -->
+      <div class="doc-card" id="textrank-adapt">
+        <h3>TextRank — PageRank Aplicado a Texto</h3>
+        <div class="doc-subtitle">Mihalcea &amp; Tarau, 2004 — mesmo algoritmo, outro domínio</div>
+        <p>O TextRank substitui <strong>páginas web por frases</strong> e <strong>links por similaridade</strong>. A lógica é idêntica: uma frase é importante se frases importantes são similares a ela.</p>
+        <div class="tfidf-example" style="grid-template-columns:1fr 1fr; margin-top:1rem;">
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">PageRank (web)</div>
+            <div class="tfidf-row"><span class="tfidf-word">Nó</span><span style="color:#64748b;font-size:0.82rem;">Página web</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Aresta</span><span style="color:#64748b;font-size:0.82rem;">Link entre páginas</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Peso</span><span style="color:#64748b;font-size:0.82rem;">Sem peso (binário)</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Direção</span><span style="color:#64748b;font-size:0.82rem;">Dirigido</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Score alto</span><span style="color:#64748b;font-size:0.82rem;">Página relevante</span></div>
+          </div>
+          <div class="tfidf-col">
+            <div class="tfidf-col-title">TextRank (texto)</div>
+            <div class="tfidf-row"><span class="tfidf-word">Nó</span><span style="color:#4ade80;font-size:0.82rem;">Frase do texto</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Aresta</span><span style="color:#4ade80;font-size:0.82rem;">Similaridade entre frases</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Peso</span><span style="color:#4ade80;font-size:0.82rem;">Palavras em comum</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Direção</span><span style="color:#4ade80;font-size:0.82rem;">Não-dirigido</span></div>
+            <div class="tfidf-row"><span class="tfidf-word">Score alto</span><span style="color:#4ade80;font-size:0.82rem;">Frase mais central</span></div>
+          </div>
+        </div>
+        <div class="formula-box" style="margin-top:1rem;">
+          <div class="formula-label">Fórmula do TextRank (grafo ponderado)</div>
+          WS(Vᵢ) = (1 − d) + d × Σⱼ [ wⱼᵢ / Σₖ wⱼₖ × WS(Vⱼ) ]
+        </div>
+        <div class="note" style="margin-top:0.5rem;">
+          <strong>wⱼᵢ</strong> = peso da aresta entre Vⱼ e Vᵢ (palavras em comum) &nbsp;·&nbsp; <strong>d = 0.85</strong> &nbsp;·&nbsp; O denominador <code>Σₖ wⱼₖ</code> normaliza pelo total de peso saindo de Vⱼ.
+        </div>
+      </div>
+
+      <!-- Convergência -->
+      <div class="doc-card" id="convergencia">
+        <h3>Convergência — Iteração Passo a Passo</h3>
+        <div class="doc-subtitle">Exemplo com 4 frases de uma notícia real</div>
+        <div class="example-text" style="margin-top:0.5rem; font-size:0.82rem;">
+          <strong>F1:</strong> "O Brasil registrou recorde de exportações em maio."<br/>
+          <strong>F2:</strong> "O agronegócio liderou os resultados com destaque para soja e milho."<br/>
+          <strong>F3:</strong> "A balança comercial fechou com superávit de R$ 12 bilhões."<br/>
+          <strong>F4:</strong> "Analistas apontam o câmbio favorável como fator principal."
+        </div>
+        <p style="margin-top:1rem; font-weight:600; color:#e2e8f0; font-size:0.86rem;">Passo 1 — Pesos (palavras em comum após stopwords + stem)</p>
+        <div style="overflow-x:auto; margin-top:0.65rem;">
+          <div class="matrix-grid" style="grid-template-columns: repeat(5, 58px);">
+            <div class="matrix-cell matrix-header"></div>
+            <div class="matrix-cell matrix-header">F1</div><div class="matrix-cell matrix-header">F2</div><div class="matrix-cell matrix-header">F3</div><div class="matrix-cell matrix-header">F4</div>
+            <div class="matrix-cell matrix-header">F1</div><div class="matrix-cell cell-diag">—</div><div class="matrix-cell cell-mid">0.54</div><div class="matrix-cell cell-low">0.21</div><div class="matrix-cell cell-low">0.18</div>
+            <div class="matrix-cell matrix-header">F2</div><div class="matrix-cell cell-mid">0.54</div><div class="matrix-cell cell-diag">—</div><div class="matrix-cell cell-mid">0.48</div><div class="matrix-cell cell-low">0.22</div>
+            <div class="matrix-cell matrix-header">F3</div><div class="matrix-cell cell-low">0.21</div><div class="matrix-cell cell-mid">0.48</div><div class="matrix-cell cell-diag">—</div><div class="matrix-cell cell-high">0.71</div>
+            <div class="matrix-cell matrix-header">F4</div><div class="matrix-cell cell-low">0.18</div><div class="matrix-cell cell-low">0.22</div><div class="matrix-cell cell-high">0.71</div><div class="matrix-cell cell-diag">—</div>
+          </div>
+        </div>
+        <p style="margin-top:1rem; font-weight:600; color:#e2e8f0; font-size:0.86rem;">Passo 2 — Iterações (score inicial = 1.0)</p>
+        <div class="svg-wrapper" style="margin-top:0.65rem;">
+          <svg viewBox="0 0 620 320" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', sans-serif">
+            <text x="70" y="22" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Iter. 0</text>
+            <circle cx="70" cy="60"  r="26" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="70" y="55"  text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F1</text><text x="70" y="68"  text-anchor="middle" fill="#475569" font-size="9">1.00</text>
+            <circle cx="70" cy="130" r="26" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="70" y="125" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F2</text><text x="70" y="138" text-anchor="middle" fill="#475569" font-size="9">1.00</text>
+            <circle cx="70" cy="200" r="26" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="70" y="195" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F3</text><text x="70" y="208" text-anchor="middle" fill="#475569" font-size="9">1.00</text>
+            <circle cx="70" cy="270" r="26" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="70" y="265" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F4</text><text x="70" y="278" text-anchor="middle" fill="#475569" font-size="9">1.00</text>
+            <text x="130" y="165" text-anchor="middle" fill="#3b82f6" font-size="20">→</text>
+            <text x="195" y="22" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Iter. 1</text>
+            <circle cx="195" cy="60"  r="26" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="195" y="55"  text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F1</text><text x="195" y="68"  text-anchor="middle" fill="#475569" font-size="9">0.81</text>
+            <circle cx="195" cy="130" r="28" fill="#141720" stroke="#3b82f6" stroke-width="1.8"/><text x="195" y="125" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F2</text><text x="195" y="138" text-anchor="middle" fill="#60a5fa" font-size="9">0.94</text>
+            <circle cx="195" cy="200" r="30" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/><text x="195" y="195" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F3</text><text x="195" y="208" text-anchor="middle" fill="#60a5fa" font-size="9">1.03</text>
+            <circle cx="195" cy="270" r="28" fill="#141720" stroke="#3b82f6" stroke-width="1.8"/><text x="195" y="265" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F4</text><text x="195" y="278" text-anchor="middle" fill="#60a5fa" font-size="9">0.91</text>
+            <text x="255" y="165" text-anchor="middle" fill="#3b82f6" font-size="20">→</text>
+            <text x="320" y="22" text-anchor="middle" fill="#334155" font-size="11" font-weight="700">Iter. 3</text>
+            <circle cx="320" cy="60"  r="24" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="320" y="55"  text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F1</text><text x="320" y="68"  text-anchor="middle" fill="#475569" font-size="9">0.74</text>
+            <circle cx="320" cy="130" r="30" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/><text x="320" y="125" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F2</text><text x="320" y="138" text-anchor="middle" fill="#60a5fa" font-size="9">1.08</text>
+            <circle cx="320" cy="205" r="34" fill="#14532d" stroke="#22c55e" stroke-width="2.5"/><text x="320" y="200" text-anchor="middle" fill="#86efac" font-size="10" font-weight="700">F3</text><text x="320" y="213" text-anchor="middle" fill="#4ade80" font-size="9">1.21</text>
+            <circle cx="320" cy="275" r="30" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/><text x="320" y="270" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F4</text><text x="320" y="283" text-anchor="middle" fill="#60a5fa" font-size="9">1.11</text>
+            <text x="382" y="165" text-anchor="middle" fill="#3b82f6" font-size="20">→</text>
+            <text x="500" y="22" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700">Convergiu ✓</text>
+            <circle cx="500" cy="60"  r="22" fill="#141720" stroke="#334155" stroke-width="1.5"/><text x="500" y="55"  text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">F1</text><text x="500" y="68"  text-anchor="middle" fill="#475569" font-size="9">0.71</text>
+            <circle cx="500" cy="128" r="30" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/><text x="500" y="123" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F2</text><text x="500" y="136" text-anchor="middle" fill="#60a5fa" font-size="9">1.12</text>
+            <circle cx="500" cy="202" r="36" fill="#14532d" stroke="#22c55e" stroke-width="3"/><text x="500" y="197" text-anchor="middle" fill="#86efac" font-size="10" font-weight="700">F3</text><text x="500" y="210" text-anchor="middle" fill="#4ade80" font-size="9">1.31 ★</text>
+            <circle cx="500" cy="274" r="30" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/><text x="500" y="269" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="700">F4</text><text x="500" y="282" text-anchor="middle" fill="#60a5fa" font-size="9">1.14</text>
+          </svg>
+        </div>
+        <div class="svg-caption">F3 emerge como a frase mais central — candidata ao título.</div>
+        <p style="margin-top:1rem; font-weight:600; color:#e2e8f0; font-size:0.86rem;">Resultado Final</p>
+        <div style="overflow-x:auto; margin-top:0.5rem;">
+          <table class="versus-table">
+            <thead><tr><th>Frase</th><th>Score</th><th>Ranking</th><th>Candidata ao título?</th></tr></thead>
+            <tbody>
+              <tr><td>F3 — "A balança comercial fechou com superávit…"</td><td><code>1.31</code></td><td>1º</td><td><span class="tag tag-green">✓ top-1</span></td></tr>
+              <tr><td>F4 — "Analistas apontam o câmbio favorável…"</td><td><code>1.14</code></td><td>2º</td><td><span class="tag tag-yellow">fallback</span></td></tr>
+              <tr><td>F2 — "O agronegócio liderou os resultados…"</td><td><code>1.12</code></td><td>3º</td><td><span class="tag tag-red">✗</span></td></tr>
+              <tr><td>F1 — "O Brasil registrou recorde…"</td><td><code>0.71</code></td><td>4º</td><td><span class="tag tag-red">✗</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note" style="margin-top:0.85rem;">
+          Convergência tipicamente em <strong>10–30 iterações</strong>. Critério de parada: variação máxima &lt; 0.0001. Convergência é garantida pois o grafo é conexo e os pesos são não-negativos.
+        </div>
+      </div>
+
+      <!-- Heurística -->
+      <div class="doc-card" id="heuristica">
+        <h3>Heurística de Geração de Título</h3>
+        <div class="doc-subtitle">O que fazer quando a frase mais importante não serve diretamente como título</div>
+        <p>A frase com maior score no TextRank é a <strong>candidata natural ao título</strong>. Porém, frases jornalísticas podem ser longas demais ou curtas demais. A heurística resolve esses dois casos extremos.</p>
+        <div class="svg-wrapper" style="margin-top:1rem;">
+          <svg viewBox="0 0 620 310" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', sans-serif">
+            <rect x="220" y="20" width="180" height="44" rx="8" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1.8"/>
+            <text x="310" y="38" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="700">Frase top-1 do TextRank</text>
+            <text x="310" y="54" text-anchor="middle" fill="#60a5fa" font-size="10">contar palavras (sem stopwords)</text>
+            <line x1="310" y1="64" x2="310" y2="95" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <polygon points="310,96 390,130 310,164 230,130" fill="#0f1117" stroke="#475569" stroke-width="1.5"/>
+            <text x="310" y="124" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700">qtd palavras?</text>
+            <text x="310" y="138" text-anchor="middle" fill="#475569" font-size="9">(sem stopwords)</text>
+            <line x1="230" y1="130" x2="90" y2="130" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <text x="158" y="122" text-anchor="middle" fill="#f59e0b" font-size="9">≤ 5 palavras</text>
+            <rect x="10" y="155" width="160" height="56" rx="8" fill="#422006" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="90" y="175" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="700">Frase muito curta</text>
+            <text x="90" y="191" text-anchor="middle" fill="#d97706" font-size="9">combinar top-1 + top-2</text>
+            <text x="90" y="203" text-anchor="middle" fill="#d97706" font-size="9">re-extrair candidata</text>
+            <line x1="90" y1="211" x2="90" y2="255" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <rect x="20" y="255" width="140" height="36" rx="6" fill="#141720" stroke="#f59e0b" stroke-width="1.2"/>
+            <text x="90" y="270" text-anchor="middle" fill="#fbbf24" font-size="10">Mini TextRank</text>
+            <text x="90" y="283" text-anchor="middle" fill="#d97706" font-size="9">sobre top-3 frases</text>
+            <line x1="310" y1="164" x2="310" y2="210" stroke="#22c55e" stroke-width="1.8" marker-end="url(#arrow)"/>
+            <text x="335" y="192" text-anchor="middle" fill="#22c55e" font-size="9">5–20 palavras</text>
+            <rect x="220" y="210" width="180" height="44" rx="8" fill="#14532d" stroke="#22c55e" stroke-width="2"/>
+            <text x="310" y="228" text-anchor="middle" fill="#86efac" font-size="11" font-weight="700">Usar como título ✓</text>
+            <text x="310" y="244" text-anchor="middle" fill="#4ade80" font-size="9">frase ideal — nenhum ajuste</text>
+            <line x1="390" y1="130" x2="530" y2="130" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <text x="462" y="122" text-anchor="middle" fill="#ef4444" font-size="9">&gt; 20 palavras</text>
+            <rect x="450" y="155" width="160" height="56" rx="8" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="530" y="175" text-anchor="middle" fill="#f87171" font-size="10" font-weight="700">Frase muito longa</text>
+            <text x="530" y="191" text-anchor="middle" fill="#dc2626" font-size="9">truncar no 1º separador</text>
+            <text x="530" y="203" text-anchor="middle" fill="#dc2626" font-size="9">natural: vírgula ou ";"</text>
+            <line x1="530" y1="211" x2="530" y2="255" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <rect x="460" y="255" width="140" height="36" rx="6" fill="#141720" stroke="#ef4444" stroke-width="1.2"/>
+            <text x="530" y="270" text-anchor="middle" fill="#f87171" font-size="10">Sub-frase extraída</text>
+            <text x="530" y="283" text-anchor="middle" fill="#dc2626" font-size="9">até a vírgula/ponto e vírgula</text>
+          </svg>
+        </div>
+        <p style="margin-top:1rem; font-weight:600; color:#e2e8f0;">Os três casos em exemplos</p>
+        <div class="example-block" style="margin-top:0.75rem;">
+          <div>
+            <div class="example-label" style="color:#f59e0b;">Caso 1 — Curta demais (≤ 5 palavras)</div>
+            <div class="example-text" style="border-color:#78350f;">
+              <strong>Top-1:</strong> "Superávit recorde." &nbsp;(2 palavras)<br/>
+              <strong>Ação:</strong> mini TextRank sobre top-3 → nova candidata<br/>
+              <strong>Título:</strong> "Balança comercial fecha com superávit recorde em maio"
+            </div>
+          </div>
+          <div>
+            <div class="example-label" style="color:#22c55e;">Caso 2 — Tamanho ideal (5–20 palavras)</div>
+            <div class="example-text" style="border-color:#166534;">
+              <strong>Top-1:</strong> "Balança comercial fecha com superávit de R$ 12 bilhões." &nbsp;(8 palavras)<br/>
+              <strong>Ação:</strong> nenhuma — usar diretamente<br/>
+              <strong>Título:</strong> "Balança comercial fecha com superávit de R$ 12 bilhões"
+            </div>
+          </div>
+          <div>
+            <div class="example-label" style="color:#ef4444;">Caso 3 — Longa demais (&gt; 20 palavras)</div>
+            <div class="example-text" style="border-color:#7f1d1d;">
+              <strong>Top-1:</strong> "O Brasil registrou recorde de exportações em maio, liderado pelo agronegócio, com destaque para soja e milho, segundo dados do Ministério da Economia." &nbsp;(26 palavras)<br/>
+              <strong>Ação:</strong> truncar na 1ª vírgula<br/>
+              <strong>Título:</strong> "O Brasil registrou recorde de exportações em maio"
+            </div>
+          </div>
+        </div>
+        <div class="note" style="margin-top:1rem;">
+          Os limiares <strong>min = 5</strong> e <strong>max = 20</strong> são configuráveis. A heurística é implementável em poucas linhas sem ML ou bibliotecas externas.
+        </div>
+      </div>
+
+      <!-- Complexidade -->
+      <div class="doc-card" id="complexidade">
+        <h3>Complexidade Computacional</h3>
+        <div class="doc-subtitle">Custo de cada etapa do pipeline</div>
+        <table class="versus-table">
+          <thead><tr><th>Etapa</th><th>Complexidade</th><th>Gargalo?</th></tr></thead>
+          <tbody>
+            <tr><td>Tokenização + Stemming</td><td><code>O(N × L)</code></td><td><span class="tag tag-green">Não</span></td></tr>
+            <tr><td>Matriz de similaridade</td><td><code>O(N² × V)</code></td><td><span class="tag tag-yellow">Pode ser</span></td></tr>
+            <tr><td>Construção do grafo</td><td><code>O(N²)</code></td><td><span class="tag tag-green">Não</span></td></tr>
+            <tr><td>TextRank (iterações)</td><td><code>O(I × E)</code></td><td><span class="tag tag-green">Não</span></td></tr>
+            <tr><td>Extração top-1 (heap)</td><td><code>O(log N)</code></td><td><span class="tag tag-green">Não</span></td></tr>
+            <tr><td>Heurística de título</td><td><code>O(L)</code></td><td><span class="tag tag-green">Não</span></td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:1rem;">
+          <strong>N</strong> = nº de frases &nbsp;·&nbsp; <strong>V</strong> = tamanho do vocabulário &nbsp;·&nbsp; <strong>L</strong> = comprimento médio de frase &nbsp;·&nbsp; <strong>I</strong> = iterações &nbsp;·&nbsp; <strong>E</strong> = nº de arestas<br/><br/>
+          O cálculo da matriz de similaridade é <strong>O(N² × V)</strong> — o passo mais custoso. Para textos curtos (&lt;100 frases) é desprezível; para grandes coleções, pode-se usar limiar de corte para criar grafo esparso.
+        </div>
+      </div>
+
+      <footer>ED2 · Grupo 4 · Universidade de Brasília · 2026</footer>
+    </div>
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('overlay');
+
+    function openMenu() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+      hamburger.classList.add('open');
+    }
+    function closeMenu() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      hamburger.classList.remove('open');
+    }
+
+    hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeMenu() : openMenu());
+    overlay.addEventListener('click', closeMenu);
+
+    // Close on nav link click (mobile)
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => { if (window.innerWidth < 769) closeMenu(); });
+    });
+
+    // Scrollspy
+    const sections = document.querySelectorAll('[id]');
+    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
