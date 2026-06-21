@@ -8,50 +8,52 @@ Sistema de sumarização extrativa baseado em grafos para geração automática 
 Texto → Frases → Stopwords + Stemming → Grafo de Similaridade → TextRank → Heurística → Título
 ```
 
-1. **Pré-processamento** — segmenta o texto em frases, remove stopwords (PT-BR), aplica stemming RSLP
-2. **Grafo** — frases = vértices; peso da aresta = palavras em comum normalizadas por log(tamanho)
-3. **TextRank** — variante do PageRank que ranqueia as frases por importância estrutural
+1. **Pré-processamento** — segmenta o texto em frases, remove stopwords (PT-BR via spaCy), aplica stemmer implementado manualmente
+2. **Grafo** — frases = vértices; peso da aresta = número de palavras em comum após pré-processamento
+3. **TextRank** — variante do PageRank implementada do zero que ranqueia as frases por importância estrutural
 4. **Heurística** — ajusta o comprimento do título (≤5 / 5–20 / >20 palavras)
 
 ## Instalação
 
 ```bash
-pip install nltk
-python main.py            # roda o exemplo embutido
-python main.py artigo.txt # processa um arquivo
+pip install -r requirements.txt
+python main.py
 ```
 
 ## Estrutura
 
 ```
 src/
-  preprocessor.py   — tokenização, stopwords, stemming
-  graph.py          — matriz de adjacência, similaridade
-  textrank.py       — algoritmo PageRank/TextRank + heap
+  preprocessor.py   — tokenização, stopwords (spaCy), stemmer manual
+  graph.py          — matriz de adjacência, similaridade por palavras em comum
+  textrank.py       — algoritmo TextRank do zero + heap para top-K frases
   heuristic.py      — heurística de comprimento do título
   pipeline.py       — orquestrador principal
 
 scripts/
-  download_dataset.py — gera artigos de desenvolvimento (JSON + .txt)
-  evaluate.py         — calcula ROUGE-1 sobre os artigos
+  download_dataset.py — gera os artigos de desenvolvimento (JSON + .txt)
+  evaluate.py         — calcula ROUGE-1 implementado do zero
 
-tests/                — 22 testes unitários (pytest)
-data/raw/             — artigos de entrada
+tests/              — testes unitários (pytest)
+data/raw/pt/        — 20 artigos PT-BR gerados por LLM (5 editorias)
+```
+
+## Dataset
+
+20 artigos em PT-BR gerados por LLM, distribuídos em 5 editorias:
+economia, política, esportes, tecnologia e saúde.
+
+Para gerar os arquivos localmente:
+
+```bash
+python scripts/download_dataset.py --ptonly
 ```
 
 ## Avaliação
 
 ```bash
-python scripts/download_dataset.py   # gera os artigos de teste
-python scripts/evaluate.py           # ROUGE-1 F1 médio
+python scripts/evaluate.py
 ```
-
-ROUGE-1 F1 médio obtido nos artigos LLM: **0.439**
-
-## Dataset
-
-- **LLM-generated (PT-BR):** 5 artigos gerados em `data/raw/`
-- **CSTNews:** corpus acadêmico NILC/USP com notícias PT-BR — baixe em http://nilc.icmc.usp.br/CSTNews/login e coloque em `data/raw/cstnews/`
 
 ## Integrantes
 
@@ -60,5 +62,5 @@ ROUGE-1 F1 médio obtido nos artigos LLM: **0.439**
 | Pessoa 1 | `src/preprocessor.py` |
 | Pessoa 2 | `src/graph.py` |
 | Pessoa 3 | `src/textrank.py` |
-| Pessoa 4 | `src/heuristic.py` + `src/pipeline.py` |
+| Pessoa 4 | `src/heuristic.py` + `src/pipeline.py` + `main.py` |
 | Pessoa 5 | `scripts/evaluate.py` + análise de resultados |
