@@ -33,7 +33,7 @@ def textrank(matrix: list[list[float]]) -> list[float]:
     return scores
 
 
-def top_k_sentences(scores: list[float], k: int = 3) -> list[int]:
+def top_k_sentences(scores: list[float], k: int = 3) -> list[tuple[float, int]]:
 
     if not scores:
         return []
