@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ED2 · Grupo 4 — Geração Automática de Títulos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e1a;
+    --card: #1a2236;
+    --border: #2d3a54;
+    --blue: #3b82f6;
+    --blue-light: #60a5fa;
+    --green: #22c55e;
+    --yellow: #facc15;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --cyan: #06b6d4;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    overflow: hidden;
+  }
+
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .slide-number {
+    position: absolute;
+    top: 28px; right: 40px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Typography ── */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-bottom: 12px;
+  }
+
+  h1 { font-size: 52px; font-weight: 800; line-height: 1.1; margin-bottom: 16px; letter-spacing: -1px; }
+  h2 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  h3 { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+
+  .subtitle {
+    font-size: 20px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 700px;
+  }
+
+  p, li { font-size: 17px; line-height: 1.7; color: var(--text-muted); }
+
+  ul { list-style: none; }
+  ul li { padding-left: 24px; position: relative; margin-bottom: 10px; }
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--blue-light);
+  }
+
+  .hl { color: var(--blue-light); font-weight: 600; }
+  .green { color: var(--green); }
+  .yellow { color: var(--yellow); }
+  .red { color: var(--red); }
+  .purple { color: var(--purple); }
+  .cyan { color: var(--cyan); }
+
+  /* ── Layouts ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 16px; }
+
+  .card-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-box h3 { font-size: 16px; margin-bottom: 8px; }
+  .card-box p, .card-box li { font-size: 15px; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 15px; }
+  th {
+    text-align: left; padding: 10px 14px;
+    background: var(--card); color: var(--blue-light);
+    font-weight: 600; font-size: 13px; letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Flow ── */
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+  .flow-step {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500;
+  }
+  .flow-step.on { background: var(--blue); border-color: var(--blue); color: white; }
+  .flow-arrow { color: var(--text-dim); font-size: 16px; }
+
+  /* ── Formula ── */
+  .formula {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue); border-radius: 8px;
+    padding: 18px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px; margin: 14px 0; line-height: 1.8;
+  }
+
+  /* ── Example ── */
+  .example {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 26px; margin-top: 14px;
+  }
+  .example-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+  }
+  .example-text { font-size: 15px; color: var(--text-muted); line-height: 1.6; font-style: italic; }
+  .example-output { font-size: 20px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+  /* ── Cover ── */
+  .cover { justify-content: center; align-items: center; text-align: center; }
+  .cover h1 {
+    font-size: 52px;
+    background: linear-gradient(135deg, var(--blue-light), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .cover .subtitle { max-width: 600px; margin: 0 auto; }
+  .cover-badge {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--blue-light);
+    border: 1px solid var(--border); padding: 8px 20px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .members { display: flex; gap: 20px; justify-content: center; margin-top: 28px; }
+  .member {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 22px; font-size: 15px; font-weight: 500;
+  }
+
+  /* ── Stats ── */
+  .stat-row { display: flex; gap: 60px; margin-top: 20px; }
+  .stat-value { font-size: 48px; font-weight: 800; color: var(--blue-light); }
+  .stat-label { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Member grid ── */
+  .member-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 24px; }
+  .member-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; text-align: center;
+  }
+  .member-card .name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .member-card .role { font-size: 13px; color: var(--text-dim); }
+  .member-card .file {
+    display: inline-block; margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: rgba(59, 130, 246, 0.1); color: var(--blue-light);
+    padding: 4px 12px; border-radius: 6px;
+  }
+
+  /* ── LLM grid ── */
+  .llm-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .llm-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; display: flex; gap: 14px;
+  }
+  .llm-icon { font-size: 22px; flex-shrink: 0; }
+  .llm-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .llm-item p { font-size: 14px; line-height: 1.5; }
+
+  .disclaimer {
+    margin-top: 20px; padding: 14px 22px;
+    background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 10px; font-size: 15px; color: var(--green); font-weight: 500;
+  }
+
+  /* ── End ── */
+  .end-slide { justify-content: center; align-items: center; text-align: center; }
+  .end-slide h1 { color: var(--text); -webkit-text-fill-color: var(--text); background: none; }
+  .end-slide .subtitle { margin: 0 auto; }
+
+  /* ── Progress ── */
+  .progress {
+    position: fixed; bottom: 0; left: 0;
+    height: 3px; background: var(--blue);
+    transition: width 0.35s ease; z-index: 100;
+  }
+
+  .nav-hint {
+    position: fixed; bottom: 18px; right: 36px;
+    font-size: 12px; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0.4; z-index: 100;
+    transition: opacity 0.5s;
+  }
+
+  @media (min-width: 1920px) {
+    .slide { padding: 80px 120px; }
+    h1 { font-size: 60px; }
+    h2 { font-size: 42px; }
+    p, li { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ SLIDE 1: CAPA ═══ -->
+<div class="slide cover active">
+  <div class="cover-badge">Estruturas de Dados 2 · UnB · 2026/1</div>
+  <h1>Geração Automática de<br>Títulos de Notícias</h1>
+  <p class="subtitle">Sumarização extrativa com grafos e TextRank</p>
+  <div class="members">
+    <div class="member">David</div>
+    <div class="member">Giovanni</div>
+    <div class="member">Gabriel</div>
+    <div class="member">Luan</div>
+    <div class="member">Pedro</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 2: PROBLEMA ═══ -->
+<div class="slide">
+  <span class="slide-number">02</span>
+  <span class="tag">O Problema</span>
+  <h2>Dado um artigo sem título,<br>qual frase representa melhor o texto?</h2>
+  <p class="subtitle" style="margin-bottom: 24px;">
+    Jornalistas gastam tempo escolhendo títulos. A gente quer achar a frase mais
+    central do texto e usar ela como base pro título — sem supervisão, sem treino.
+  </p>
+  <div class="three-col">
+    <div class="card-box">
+      <h3 class="hl">Redações</h3>
+      <p>Sugerir títulos durante a edição pra agilizar o fluxo de trabalho</p>
+    </div>
+    <div class="card-box">
+      <h3 class="hl">Newsletters</h3>
+      <p>Titular artigos que vem de feed RSS e não tem título próprio</p>
+    </div>
+    <div class="card-box">
+      <h3 class="hl">Acervos</h3>
+      <p>Gerar títulos pra documentos escaneados que não tem cabeçalho</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3: MODELAGEM DO GRAFO ═══ -->
+<div class="slide">
+  <span class="slide-number">03</span>
+  <span class="tag">Modelagem do Grafo</span>
+  <h2>Frases viram nós, palavras em comum viram arestas</h2>
+  <div style="display: flex; gap: 28px; margin-top: 8px; font-size: 13px; color: var(--text-dim); flex-wrap: wrap;">
+    <span><strong class="hl">Vértices</strong> = frases</span>
+    <span><strong class="green">Arestas</strong> = frases com palavras em comum</span>
+    <span><strong class="yellow">Peso</strong> = qtd de stems compartilhados</span>
+    <span><strong class="purple">Tipo</strong> = não-direcionado, ponderado</span>
+  </div>
+
+  <!-- grafo com frases reais -->
+  <!--
+    Artigo usado:
+    S1: "O Brasil registrou recorde de exportações em maio."
+    S2: "As exportações do agronegócio lideraram os resultados do mês."
+    S3: "A balança comercial fechou o mês com superávit recorde."
+    S4: "O câmbio favorável impulsionou as exportações brasileiras."
+    S5: "O setor industrial também registrou crescimento no período."
+
+    Stems (após stopwords + RSLP):
+    S1: {brasil, registr, record, export, mai}
+    S2: {export, agronegóci, lider, result, mês}
+    S3: {balanç, comerci, fech, mês, superávit, record}
+    S4: {câmbi, favoráv, impulsion, export, brasileir}
+    S5: {set, industri, registr, cresc, períod}
+
+    Interseções:
+    S1∩S2 = {export}        → w=1
+    S1∩S3 = {record}        → w=1
+    S1∩S4 = {export}        → w=1
+    S1∩S5 = {registr}       → w=1
+    S2∩S3 = {mês}           → w=1
+    S2∩S4 = {export}        → w=1
+    S3∩S4 = ∅               → sem aresta
+    S3∩S5 = ∅               → sem aresta
+    S4∩S5 = ∅               → sem aresta
+    S2∩S5 = ∅               → sem aresta
+
+    S1 tem grau 4 (mais conectado → maior score no TextRank)
+  -->
+  <svg viewBox="0 0 900 360" width="100%" xmlns="http://www.w3.org/2000/svg" style="margin-top: 12px;">
+    <!-- posições dos nós (centros dos retângulos):
+         S1: 450, 60   (topo centro — mais importante)
+         S2: 140, 175
+         S3: 760, 175
+         S4: 140, 310
+         S5: 760, 310
+    -->
+
+    <!-- ── arestas (desenhadas antes dos nós pra ficar atrás) ── -->
+    <!-- S1—S2  w=1 (export) -->
+    <line x1="310" y1="68" x2="280" y2="170" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+    <!-- S1—S3  w=1 (record) -->
+    <line x1="590" y1="68" x2="620" y2="170" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+    <!-- S1—S4  w=1 (export) -->
+    <line x1="310" y1="72" x2="250" y2="300" stroke="#3b82f6" stroke-width="2" opacity="0.4"/>
+    <!-- S1—S5  w=1 (registr) -->
+    <line x1="590" y1="72" x2="650" y2="300" stroke="#3b82f6" stroke-width="2" opacity="0.4"/>
+    <!-- S2—S3  w=1 (mês) -->
+    <line x1="280" y1="180" x2="620" y2="180" stroke="#60a5fa" stroke-width="1.5" opacity="0.3" stroke-dasharray="6 4"/>
+    <!-- S2—S4  w=1 (export) -->
+    <line x1="140" y1="200" x2="140" y2="295" stroke="#3b82f6" stroke-width="2" opacity="0.5"/>
+
+    <!-- ── pesos nas arestas ── -->
+    <rect x="268" y="104" width="52" height="20" rx="4" fill="#0a0e1a" opacity="0.85"/>
+    <text x="294" y="118" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono" font-weight="500">w=1</text>
+    <text x="294" y="132" text-anchor="middle" fill="#64748b" font-size="9" font-family="Inter" font-style="italic">export</text>
+
+    <rect x="578" y="104" width="52" height="20" rx="4" fill="#0a0e1a" opacity="0.85"/>
+    <text x="604" y="118" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono" font-weight="500">w=1</text>
+    <text x="604" y="132" text-anchor="middle" fill="#64748b" font-size="9" font-family="Inter" font-style="italic">record</text>
+
+    <rect x="240" y="190" width="52" height="20" rx="4" fill="#0a0e1a" opacity="0.85"/>
+    <text x="266" y="204" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono" font-weight="500">w=1</text>
+    <text x="266" y="218" text-anchor="middle" fill="#64748b" font-size="9" font-family="Inter" font-style="italic">export</text>
+
+    <rect x="624" y="190" width="52" height="20" rx="4" fill="#0a0e1a" opacity="0.85"/>
+    <text x="650" y="204" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono" font-weight="500">w=1</text>
+    <text x="650" y="218" text-anchor="middle" fill="#64748b" font-size="9" font-family="Inter" font-style="italic">registr</text>
+
+    <text x="450" y="193" text-anchor="middle" fill="#64748b" font-size="10" font-family="JetBrains Mono">w=1 (mês)</text>
+
+    <rect x="148" y="240" width="52" height="20" rx="4" fill="#0a0e1a" opacity="0.85"/>
+    <text x="174" y="254" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="JetBrains Mono" font-weight="500">w=1</text>
+    <text x="174" y="268" text-anchor="middle" fill="#64748b" font-size="9" font-family="Inter" font-style="italic">export</text>
+
+    <!-- ── nós (retângulos com frases) ── -->
+    <!-- S1 — mais conectado, destaque azul -->
+    <rect x="290" y="34" rx="10" width="320" height="52" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-width="2"/>
+    <text x="308" y="56" fill="#3b82f6" font-size="13" font-weight="700" font-family="Inter">S1</text>
+    <text x="338" y="56" fill="#e2e8f0" font-size="12" font-family="Inter">O Brasil registrou recorde de exportações…</text>
+    <text x="308" y="74" fill="#3b82f6" font-size="10" font-family="JetBrains Mono">grau: 4 — mais conectado</text>
+
+    <!-- S2 -->
+    <rect x="20" y="152" rx="10" width="258" height="46" fill="#1a2236" stroke="#2d3a54" stroke-width="1.5"/>
+    <text x="36" y="174" fill="#60a5fa" font-size="12" font-weight="700" font-family="Inter">S2</text>
+    <text x="60" y="174" fill="#94a3b8" font-size="11" font-family="Inter">As exportações do agronegócio…</text>
+    <text x="36" y="190" fill="#64748b" font-size="10" font-family="JetBrains Mono">grau: 3</text>
+
+    <!-- S3 -->
+    <rect x="622" y="152" rx="10" width="258" height="46" fill="#1a2236" stroke="#2d3a54" stroke-width="1.5"/>
+    <text x="638" y="174" fill="#60a5fa" font-size="12" font-weight="700" font-family="Inter">S3</text>
+    <text x="662" y="174" fill="#94a3b8" font-size="11" font-family="Inter">A balança comercial fechou o mês…</text>
+    <text x="638" y="190" fill="#64748b" font-size="10" font-family="JetBrains Mono">grau: 2</text>
+
+    <!-- S4 -->
+    <rect x="20" y="290" rx="10" width="258" height="46" fill="#1a2236" stroke="#2d3a54" stroke-width="1.5"/>
+    <text x="36" y="312" fill="#60a5fa" font-size="12" font-weight="700" font-family="Inter">S4</text>
+    <text x="60" y="312" fill="#94a3b8" font-size="11" font-family="Inter">O câmbio impulsionou as exportações…</text>
+    <text x="36" y="328" fill="#64748b" font-size="10" font-family="JetBrains Mono">grau: 2</text>
+
+    <!-- S5 -->
+    <rect x="622" y="290" rx="10" width="258" height="46" fill="#1a2236" stroke="#2d3a54" stroke-width="1.5"/>
+    <text x="638" y="312" fill="#60a5fa" font-size="12" font-weight="700" font-family="Inter">S5</text>
+    <text x="662" y="312" fill="#94a3b8" font-size="11" font-family="Inter">O setor industrial registrou crescimento…</text>
+    <text x="638" y="328" fill="#64748b" font-size="10" font-family="JetBrains Mono">grau: 1</text>
+
+    <!-- ── legenda ── -->
+    <text x="450" y="352" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="600" font-family="Inter">S1 é o nó mais conectado → maior score no TextRank → vira o título</text>
+  </svg>
+</div>
+
+<!-- ═══ SLIDE 4: PIPELINE ═══ -->
+<div class="slide">
+  <span class="slide-number">04</span>
+  <span class="tag">Pipeline</span>
+  <h2>Fluxo completo: texto até título</h2>
+  <div class="flow" style="margin: 28px 0; justify-content: center;">
+    <span class="flow-step">Texto bruto</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Separar frases</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Stopwords + Stem</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step on">Montar grafo</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step on">TextRank</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Heurística</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step on">Título</span>
+  </div>
+  <div class="two-col" style="margin-top: 12px;">
+    <div class="card-box">
+      <h3>Pré-processamento</h3>
+      <ul>
+        <li>Regex pra separar frases por <code>. ! ?</code></li>
+        <li>Tudo em minúsculo, só letras</li>
+        <li>Remove stopwords com NLTK (PT-BR)</li>
+        <li>Stemming com <strong>RSLPStemmer</strong> do NLTK — stemmer acadêmico pra português</li>
+      </ul>
+    </div>
+    <div class="card-box">
+      <h3>Exemplo do stemming</h3>
+      <table>
+        <tr><td><code>exportações</code></td><td>→</td><td><code class="green">export</code></td></tr>
+        <tr><td><code>exportou</code></td><td>→</td><td><code class="green">export</code></td></tr>
+        <tr><td><code>liderança</code></td><td>→</td><td><code class="green">lider</code></td></tr>
+        <tr><td><code>crescimento</code></td><td>→</td><td><code class="green">cresc</code></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5: SIMILARIDADE ═══ -->
+<div class="slide">
+  <span class="slide-number">05</span>
+  <span class="tag">Similaridade</span>
+  <h2>Peso da aresta = palavras em comum</h2>
+  <div class="formula">
+    $$\text{sim}(S_i,\, S_j) = \left|\, \text{stems}(S_i) \;\cap\; \text{stems}(S_j) \,\right|$$
+  </div>
+  <div class="two-col" style="margin-top: 16px;">
+    <div>
+      <h3>Como funciona</h3>
+      <ul>
+        <li>Pega os stems de cada frase</li>
+        <li>Joga num <code>set()</code> (tabela hash)</li>
+        <li>Faz a interseção — $O(\min(|A|, |B|))$</li>
+        <li>Resultado: quantas palavras as duas frases compartilham</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card-box">
+        <h3>Por que matriz de adjacência?</h3>
+        <p>O TextRank consulta $w_{ij}$ toda iteração — na <strong class="hl">matriz</strong> é $O(1)$.</p>
+        <p style="margin-top: 8px;">Com <strong>lista de adjacência</strong> seria $O(\deg(v))$ por consulta, e como o grafo tende a ser <strong>denso</strong> (muitas frases compartilham palavras), a lista nem economiza memória.</p>
+        <p style="margin-top: 8px;">Espaço: $O(n^2)$. Simétrica: $M[i][j] = M[j][i]$, diagonal $= 0$.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 6: TEXTRANK ═══ -->
+<div class="slide">
+  <span class="slide-number">06</span>
+  <span class="tag">TextRank</span>
+  <h2>PageRank adaptado pra frases</h2>
+  <div class="formula">
+    $$WS(V_i) = (1 - d) + d \cdot \sum_{V_j \in \text{In}(V_i)} \frac{w_{ji}}{\sum_{V_k \in \text{Out}(V_j)} w_{jk}} \cdot WS(V_j)$$
+  </div>
+  <div class="two-col" style="margin-top: 16px;">
+    <div>
+      <ul>
+        <li><strong class="hl">$d = 0.85$</strong> — chance do "surfista aleatório" continuar navegando</li>
+        <li><strong>Inicialização</strong> — todos os scores começam em $\frac{1}{n}$</li>
+        <li><strong>Para</strong> quando $\sum |s_i^{(t)} - s_i^{(t-1)}| < 10^{-4}$ ou 100 iterações</li>
+        <li>Baseado no <strong>PageRank</strong> do Google (Brin &amp; Page, 1998)</li>
+        <li>Adaptado por Mihalcea &amp; Tarau (2004) pra textos</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card-box">
+        <h3>Heap — fila de prioridade</h3>
+        <p>Depois de rodar o TextRank, a gente precisa das <strong class="hl">top-K frases</strong>.</p>
+        <p style="margin-top: 8px;">Usar <code>heapq</code> (stdlib) → $O(k \log n)$</p>
+        <p style="margin-top: 8px;">Mais eficiente que ordenar tudo ($O(n \log n)$) quando $k \ll n$.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 7: HEURÍSTICA ═══ -->
+<div class="slide">
+  <span class="slide-number">07</span>
+  <span class="tag">Heurística</span>
+  <h2>A frase precisa virar um título bom</h2>
+  <p style="margin-bottom: 20px;">
+    Nem toda frase tem tamanho certo pra título. A heurística ajusta isso:
+  </p>
+  <table style="max-width: 850px;">
+    <tr><th>Caso</th><th>Condição</th><th>O que faz</th></tr>
+    <tr>
+      <td><strong class="red">Curta</strong></td>
+      <td><code>≤ 5 palavras</code></td>
+      <td>Roda um mini TextRank sobre as top-3 frases e escolhe a melhor delas</td>
+    </tr>
+    <tr>
+      <td><strong class="green">Ideal</strong></td>
+      <td><code>5 – 20 palavras</code></td>
+      <td>Usa a frase direto como título</td>
+    </tr>
+    <tr>
+      <td><strong class="yellow">Longa</strong></td>
+      <td><code>&gt; 20 palavras</code></td>
+      <td>Corta na primeira vírgula ou ponto-e-vírgula</td>
+    </tr>
+  </table>
+  <p style="margin-top: 20px; font-size: 14px; color: var(--text-dim);">
+    No final: primeira letra maiúscula e remove o ponto final.
+  </p>
+</div>
+
+<!-- ═══ SLIDE 8: IMPLEMENTAÇÃO ═══ -->
+<div class="slide">
+  <span class="slide-number">08</span>
+  <span class="tag">Implementação</span>
+  <h2>Python — NLTK no pré-processamento,<br>grafos e TextRank do zero</h2>
+  <div class="two-col">
+    <div>
+      <h3 style="margin-bottom: 14px;">Módulos</h3>
+      <table>
+        <tr><td><code>preprocessor.py</code></td><td>Tokenização, NLTK stopwords + stemmer</td></tr>
+        <tr><td><code>graph.py</code></td><td>Matriz de adjacência</td></tr>
+        <tr><td><code>textrank.py</code></td><td>TextRank + heap</td></tr>
+        <tr><td><code>heuristic.py</code></td><td>Regras de comprimento</td></tr>
+        <tr><td><code>pipeline.py</code></td><td>Junta tudo</td></tr>
+        <tr><td><code>evaluate.py</code></td><td>ROUGE-1 do zero</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 style="margin-bottom: 14px;">Estruturas de dados usadas</h3>
+      <div class="card-box" style="margin-bottom: 10px;">
+        <h3 class="hl">Grafo</h3>
+        <p>Matriz de adjacência — <code>list[list[float]]</code></p>
+      </div>
+      <div class="card-box" style="margin-bottom: 10px;">
+        <h3 class="green">Heap</h3>
+        <p>Fila de prioridade — <code>heapq</code></p>
+      </div>
+      <div class="card-box">
+        <h3 class="purple">Tabela Hash</h3>
+        <p><code>set()</code> pra calcular interseção de palavras</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 9: EXEMPLO E/S ═══ -->
+<div class="slide">
+  <span class="slide-number">09</span>
+  <span class="tag">Exemplo</span>
+  <h2>Entrada e Saída</h2>
+  <div class="example">
+    <div class="example-label">Input — corpo do artigo</div>
+    <p class="example-text">
+      "O Brasil registrou recorde de exportações em maio. O agronegócio liderou os
+      resultados, com destaque para a soja e o milho. A balança comercial fechou com
+      superávit de R$ 12 bilhões. Analistas apontam o câmbio favorável como fator
+      principal. O setor industrial também apresentou crescimento moderado."
+    </p>
+  </div>
+  <div class="example" style="margin-top: 14px; border: 1px solid rgba(34, 197, 94, 0.3);">
+    <div class="example-label" style="color: var(--green);">Output</div>
+    <p class="example-output">"O Brasil registrou recorde de exportações em maio"</p>
+  </div>
+  <div style="display: flex; gap: 28px; margin-top: 18px; font-size: 14px; color: var(--text-dim);">
+    <span>S1: <strong class="hl">0.31</strong> ← melhor</span>
+    <span>S2: 0.22</span>
+    <span>S3: 0.19</span>
+    <span>S4: 0.15</span>
+    <span>S5: 0.13</span>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 10: DATASET ═══ -->
+<div class="slide">
+  <span class="slide-number">10</span>
+  <span class="tag">Dataset</span>
+  <h2>20 artigos PT-BR, 5 editorias</h2>
+  <p class="subtitle" style="margin-bottom: 20px;">
+    Artigos gerados por LLM com formato jornalístico real. Cada um tem um título de referência pra poder medir a qualidade.
+  </p>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-value">20</div>
+      <div class="stat-label">artigos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">5</div>
+      <div class="stat-label">editorias</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">4</div>
+      <div class="stat-label">por editoria</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap;">
+    <span class="flow-step" style="border-color: var(--blue); color: var(--blue-light);">Economia</span>
+    <span class="flow-step" style="border-color: var(--purple); color: var(--purple);">Política</span>
+    <span class="flow-step" style="border-color: var(--green); color: var(--green);">Esportes</span>
+    <span class="flow-step" style="border-color: var(--cyan); color: var(--cyan);">Tecnologia</span>
+    <span class="flow-step" style="border-color: var(--red); color: var(--red);">Saúde</span>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 11: ANÁLISE ═══ -->
+<div class="slide">
+  <span class="slide-number">11</span>
+  <span class="tag">Resultados</span>
+  <h2>Avaliação com ROUGE-1</h2>
+  <div class="two-col">
+    <div>
+      <p style="margin-bottom: 14px;">
+        ROUGE-1 compara as palavras do título gerado com o título de referência. A gente implementou a métrica do zero.
+      </p>
+      <div class="formula" style="font-size: 14px;">
+        $$P = \frac{|H \cap R|}{|H|} \qquad R = \frac{|H \cap R|}{|R|} \qquad F_1 = \frac{2 \cdot P \cdot R}{P + R}$$
+      </div>
+      <div class="card-box" style="margin-top: 14px;">
+        <h3>Por que o ROUGE não dá 1.0?</h3>
+        <p>O sistema copia a frase inteira (<strong class="hl">extrativo</strong>). O título de referência reformula e comprime (<strong class="yellow">abstrativo</strong>). Então mesmo acertando a ideia, as palavras diferem.</p>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom: 10px;">Alguns resultados</h3>
+      <table>
+        <tr><th>Artigo</th><th>F1</th><th>Obs</th></tr>
+        <tr><td><code>po_003</code></td><td><strong class="green">0.824</strong></td><td>Acertou em cheio</td></tr>
+        <tr><td><code>ec_002</code></td><td><strong class="green">0.714</strong></td><td>Boa cobertura</td></tr>
+        <tr><td><code>sa_001</code></td><td><strong class="hl">0.625</strong></td><td>Palavras-chave presentes</td></tr>
+        <tr><td><code>po_001</code></td><td><strong class="red">0.000</strong></td><td>Pegou frase errada</td></tr>
+        <tr><td><code>es_003</code></td><td><strong class="red">0.000</strong></td><td>Grafo muito desconexo</td></tr>
+      </table>
+      <p style="margin-top: 14px; font-size: 14px; color: var(--text-dim);">
+        Mudar o <code>threshold</code> do grafo afeta diretamente a densidade das conexões e os scores finais.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 12: CONTRIBUIÇÕES ═══ -->
+<div class="slide">
+  <span class="slide-number">12</span>
+  <span class="tag">Contribuições</span>
+  <h2>Quem fez o quê</h2>
+  <div class="member-grid" style="margin-top: 28px;">
+    <div class="member-card">
+      <div class="name">David</div>
+      <div class="role">Pré-processamento</div>
+      <div class="file">preprocessor.py</div>
+    </div>
+    <div class="member-card">
+      <div class="name">Giovanni</div>
+      <div class="role">Grafo de similaridade</div>
+      <div class="file">graph.py</div>
+    </div>
+    <div class="member-card">
+      <div class="name">Gabriel</div>
+      <div class="role">Algoritmo TextRank</div>
+      <div class="file">textrank.py</div>
+    </div>
+    <div class="member-card">
+      <div class="name">Luan</div>
+      <div class="role">Heurística + Pipeline</div>
+      <div class="file">heuristic.py</div>
+    </div>
+    <div class="member-card">
+      <div class="name">Pedro</div>
+      <div class="role">Avaliação + Análise</div>
+      <div class="file">evaluate.py</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 13: USO DE LLM ═══ -->
+<div class="slide">
+  <span class="slide-number">13</span>
+  <span class="tag">Uso de LLM</span>
+  <h2>Como a IA ajudou no projeto</h2>
+  <div class="llm-list">
+    <div class="llm-item">
+      <span class="llm-icon">📰</span>
+      <div>
+        <h4>Dataset</h4>
+        <p>Gerou os 20 artigos fictícios em PT-BR que a gente usa pra testar e avaliar</p>
+      </div>
+    </div>
+    <div class="llm-item">
+      <span class="llm-icon">🏗️</span>
+      <div>
+        <h4>Estrutura do projeto</h4>
+        <p>Ajudou a definir a divisão em módulos e as interfaces entre eles</p>
+      </div>
+    </div>
+    <div class="llm-item">
+      <span class="llm-icon">📖</span>
+      <div>
+        <h4>Documentação</h4>
+        <p>Gerou o site de documentação técnica (<code>ed2-grupo-4.surge.sh</code>)</p>
+      </div>
+    </div>
+    <div class="llm-item">
+      <span class="llm-icon">🎓</span>
+      <div>
+        <h4>Estudo</h4>
+        <p>Explicou os conceitos de TextRank, PageRank e sumarização extrativa</p>
+      </div>
+    </div>
+  </div>
+  <div class="disclaimer">
+    ✓ Grafos, TextRank, heap e ROUGE-1 foram implementados do zero pelo grupo. NLTK usado apenas no pré-processamento (stopwords e stemming).
+  </div>
+</div>
+
+<!-- ═══ SLIDE 14: REFERÊNCIAS ═══ -->
+<div class="slide">
+  <span class="slide-number">14</span>
+  <span class="tag">Referências</span>
+  <h2>Bibliografia</h2>
+  <div style="margin-top: 24px;">
+    <div class="card-box" style="margin-bottom: 16px;">
+      <p style="font-size: 16px; line-height: 1.7; color: var(--text);">
+        Mihalcea, R. &amp; Tarau, P. (2004).
+        <strong class="hl">TextRank: Bringing Order into Texts.</strong>
+        <em>Proceedings of EMNLP 2004.</em>
+      </p>
+    </div>
+    <div class="card-box">
+      <p style="font-size: 16px; line-height: 1.7; color: var(--text);">
+        Brin, S. &amp; Page, L. (1998).
+        <strong class="hl">The Anatomy of a Large-Scale Hypertextual Web Search Engine.</strong>
+        <em>Computer Networks and ISDN Systems, 30(1-7), 107-117.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 15: FIM ═══ -->
+<div class="slide end-slide">
+  <h1>Obrigado!</h1>
+  <p class="subtitle">ED2 · Grupo 4 · UnB — 2026/1</p>
+  <div class="members" style="margin-top: 24px;">
+    <div class="member">David</div>
+    <div class="member">Giovanni</div>
+    <div class="member">Gabriel</div>
+    <div class="member">Luan</div>
+    <div class="member">Pedro</div>
+  </div>
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="nav-hint" id="navHint">← → espaço</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+
+function goTo(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  document.getElementById('progress').style.width =
+    ((current + 1) / slides.length * 100) + '%';
+  document.getElementById('navHint').style.opacity = '0';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault(); goTo(current + 1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+    e.preventDefault(); goTo(current - 1);
+  } else if (e.key === 'Home') { goTo(0); }
+  else if (e.key === 'End') { goTo(slides.length - 1); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
+});
+
+document.addEventListener('click', e => {
+  if (e.clientX > window.innerWidth * 0.5) goTo(current + 1);
+  else goTo(current - 1);
+});
+
+document.getElementById('progress').style.width =
+  (1 / slides.length * 100) + '%';
+</script>
+
+</body>
+</html>

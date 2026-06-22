@@ -5,7 +5,7 @@ from src.heuristic import apply_heuristic
 
 def generate_title(text: str, threshold: float = 0.1) -> dict:
     sentences, processed = preprocess_text(text)
-    matrix = build_graph(sentences, threshold)
+    matrix = build_graph(processed, threshold)
     scores = textrank(matrix)
     top = top_k_sentences(scores, k=3)
     best_idx = best_sentence_index(scores)

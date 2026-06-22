@@ -31,8 +31,13 @@ def stem(word: str) -> str:
     return _stemmer.stem(word)
 
 
-def preprocess_text(text) -> str:
-    tokens = tokenize(text)
+def preprocess_sentence(sentence: str) -> list[str]:
+    tokens = tokenize(sentence)
     tokens = remove_stopwords(tokens)
-    tokens = [stem(t) for t in tokens]
-    return " ".join(tokens)
+    return [stem(t) for t in tokens]
+
+
+def preprocess_text(text: str) -> tuple[list[str], list[list[str]]]:
+    sentences = split_sentences(text)
+    processed = [preprocess_sentence(s) for s in sentences]
+    return sentences, processed

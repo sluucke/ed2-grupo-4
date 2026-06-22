@@ -89,21 +89,29 @@ class TestStem:
 
 
 class TestPreprocessText:
-    def test_returns_string(self):
-        assert isinstance(preprocess_text("O Brasil é um país grande."), str)
+    def test_returns_tuple_of_two_lists(self):
+        sentences, processed = preprocess_text("O Brasil é um país grande.")
+        assert isinstance(sentences, list)
+        assert isinstance(processed, list)
 
-    def test_stopwords_removed_from_output(self):
-        tokens = preprocess_text("de acordo com a proposta").split()
-        assert "de" not in tokens
-        assert "com" not in tokens
-        assert "a" not in tokens
+    def test_sentences_and_processed_same_length(self):
+        sentences, processed = preprocess_text("O gato dorme. O cachorro late.")
+        assert len(sentences) == len(processed)
+
+    def test_processed_contains_stems(self):
+        sentences, processed = preprocess_text("Computadores modernos processam dados.")
+        assert len(processed) == 1
+        assert len(processed[0]) > 0
+        assert all(isinstance(s, str) for s in processed[0])
 
     def test_empty_string(self):
-        assert preprocess_text("") == ""
+        sentences, processed = preprocess_text("")
+        assert sentences == []
+        assert processed == []
 
-    def test_only_stopwords_yields_empty(self):
-        assert preprocess_text("de a o que e para com") == ""
-
-    def test_content_words_survive(self):
-        result = preprocess_text("computadores modernos processam dados")
-        assert len(result) > 0
+    def test_stopwords_removed_from_processed(self):
+        _, processed = preprocess_text("O Brasil exportou soja para a China.")
+        all_stems = processed[0]
+        assert "o" not in all_stems
+        assert "para" not in all_stems
+        assert "a" not in all_stems
