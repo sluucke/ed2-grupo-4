@@ -1,7 +1,8 @@
-from src.graph import build_graph
+from src.graph import build_graph, graph_stats
 from src.preprocessor import preprocess_text
 from src.textrank import textrank, top_k_sentences, best_sentence_index
 from src.heuristic import apply_heuristic
+
 
 def generate_title(text: str, threshold: float = 0.1) -> dict:
     sentences, processed = preprocess_text(text)
@@ -14,9 +15,7 @@ def generate_title(text: str, threshold: float = 0.1) -> dict:
     return {
         "title": title,
         "best_sentence_index": best_idx,
-        "graph_stats": {
-            "num_sentences": len(sentences),
-            "num_edges": sum(len(row) for row in matrix) // 2,  # grafo não direcionado
-            "average_degree": sum(len(row) for row in matrix) / len(sentences)
-        }
+        "scores": scores,
+        "sentences": sentences,
+        "graph_stats": graph_stats(matrix),
     }
